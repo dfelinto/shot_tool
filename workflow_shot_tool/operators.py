@@ -96,12 +96,8 @@ class ST_RemoveMarkersOperator(Operator):
     bl_idname = "shot_tool.remove_markers"
     bl_label = "Remove Markers"
 
-    @classmethod
-    def poll(cls, context):
-        return False
-
     def execute(self, context):
-        TODO
+        context.scene.timeline_markers.clear()
         return {'FINISHED'}
 
 
