@@ -8,6 +8,10 @@ from bpy.types import (
         Operator,
         )
 
+from .defines import (
+        SHOT_TYPE,
+        )
+
 TODO = False
 
 # ############################################################
@@ -18,12 +22,18 @@ class ST_NameSceneOperator(Operator):
     bl_idname = "shot_tool.name_scene"
     bl_label = "Name Scene"
 
-    @classmethod
-    def poll(cls, context):
-        return False
-
     def execute(self, context):
-        TODO
+        names = {
+                SHOT_TYPE.LAYOUT: 'layout',
+                SHOT_TYPE.ANIMATION: 'anim',
+                SHOT_TYPE.LIGHTING: 'lighting',
+                }
+
+        scene = context.scene
+        scene.name = "{0}.{1}".format(
+                scene.shot_name,
+                names.get(scene.shot_type),
+                )
         return {'FINISHED'}
 
 
