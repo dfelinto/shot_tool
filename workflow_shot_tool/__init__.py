@@ -34,6 +34,7 @@ import importlib
 
 from . import operators
 from . import ui
+from . import handlers
 
 from .defines import (
         SHOT_TYPE,
@@ -45,8 +46,14 @@ from bpy.props import (
         )
 
 # allow for simple refresh of addon
-importlib.reload(operators)
-importlib.reload(ui)
+modules = (
+        operators,
+        ui,
+        handlers,
+        )
+
+for m in modules:
+    importlib.reload(m)
 
 
 # ############################################################
@@ -89,6 +96,7 @@ def register():
 
     operators.register()
     ui.register()
+    handlers.register()
 
 
 def unregister():
@@ -100,7 +108,9 @@ def unregister():
 
     ui.unregister()
     operators.unregister()
+    handlers.unregister()
 
 
 if __name__ == "__main__":
     register()
+
