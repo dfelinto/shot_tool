@@ -145,12 +145,10 @@ class ST_SetHairSystemDefaultsOperator(Operator):
     bl_idname = "shot_tool.set_hair_system_defaults"
     bl_label = "Set Hair System Defaults"
 
-    @classmethod
-    def poll(cls, context):
-        return False
-
     def execute(self, context):
-        TODO
+        cycles_curves = context.scene.cycles_curves
+        cycles_curves.primitive = 'LINE_SEGMENTS'
+        cycles_curves.shape = 'RIBBONS'
         return {'FINISHED'}
 
 
