@@ -43,12 +43,40 @@ class ST_NameActionsOperator(Operator):
     bl_idname = "shot_tool.name_actions"
     bl_label = "Name Actions"
 
-    @classmethod
-    def poll(cls, context):
-        return False
-
     def execute(self, context):
-        TODO
+        lookup = {
+                'Agent_high_proxy': 'agent',
+                'Boris_high_proxy': 'boris',
+                'Barber_high_proxy': 'barber',
+                'picture_frame_appel_imitation_proxy': 'picture_frame_painting',
+                'books_proxy': 'books',
+                'bust_proxy': 'bust',
+                'barbershop_interior_proxy': 'barbershop_interior',
+                'chair_barbershop1_proxy': 'chair_barbershop1',
+                'chair_barbershop2_proxy': 'chair_barbershop2',
+                'chair_barbershop3_proxy': 'chair_barbershop3',
+                }
+
+        scene = context.scene
+        shot_name = scene.shot_name
+
+        for ob in context.scene.objects:
+            if ob.animation_data and ob.animation_data.action:
+                ob_name = ob.name
+                action = ob.animation_data.action
+                action_name = lookup.get(ob_name)
+
+                if not action_name:
+                    if ob_name.endswith('_proxy'):
+                        action_name = ob_name[:-6]
+                    else:
+                        action_name = ob_name
+
+                action.name = "{0}.{1}".format(
+                        shot_name,
+                        action_name,
+                )
+
         return {'FINISHED'}
 
 
