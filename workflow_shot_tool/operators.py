@@ -19,6 +19,7 @@ TODO = False
 # ############################################################
 
 class ST_NameSceneOperator(Operator):
+    """Sets the scene name to <shot name>.<file type>"""
     bl_idname = "shot_tool.name_scene"
     bl_label = "Name Scene"
 
@@ -38,6 +39,7 @@ class ST_NameSceneOperator(Operator):
 
 
 class ST_NameActionsOperator(Operator):
+    """Names all proxy object actions across the scene according to <shot name>"""
     bl_idname = "shot_tool.name_actions"
     bl_label = "Name Actions"
 
@@ -51,6 +53,7 @@ class ST_NameActionsOperator(Operator):
 
 
 class ST_AssignLayersOperator(Operator):
+    """This puts the character group instances and their proxies on layers, depending on the file type"""
     bl_idname = "shot_tool.assign_characters_layers"
     bl_label = "Assign Characters Layers"
 
@@ -64,6 +67,7 @@ class ST_AssignLayersOperator(Operator):
 
 
 class ST_SetMetadataOperator(Operator):
+    """Sets output metadata (stamp) according to file type"""
     bl_idname = "shot_tool.set_metadata"
     bl_label = "Set Metadata"
 
@@ -120,6 +124,7 @@ class ST_SetResolutionOperator(Operator):
 # ############################################################
 
 class ST_RemoveSequenceStripsOperator(Operator):
+    """Cleans up all strip data from the sequencer"""
     bl_idname = "shot_tool.remove_sequence_strips"
     bl_label = "Remove Sequence Strips"
 
@@ -129,6 +134,7 @@ class ST_RemoveSequenceStripsOperator(Operator):
 
 
 class ST_RemoveMarkersOperator(Operator):
+    """Cleans up all markers globally"""
     bl_idname = "shot_tool.remove_markers"
     bl_label = "Remove Markers"
 
