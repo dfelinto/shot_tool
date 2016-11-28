@@ -30,9 +30,14 @@ bl_info = {
 
 
 import bpy
+import importlib
 
 from . import operators
 from . import ui
+
+# allow for simple refresh of addon
+importlib.reload(operators)
+importlib.reload(ui)
 
 
 from bpy.props import (
