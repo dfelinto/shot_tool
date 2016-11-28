@@ -156,12 +156,41 @@ class ST_SetRenderDefaultsOperator(Operator):
     bl_idname = "shot_tool.set_render_defaults"
     bl_label = "Set Render Defaults"
 
-    @classmethod
-    def poll(cls, context):
-        return False
-
     def execute(self, context):
-        TODO
+        cycles = context.scene.cycles
+        cycles.max_bounces = 2
+        cycles.min_bounces = 2
+        cycles.diffuse_bounces = 2
+        cycles.glossy_bounces = 2
+        cycles.transmission_bounces = 2
+        cycles.volume_bounces = 0
+        cycles.transparent_min_bounces = 32
+        cycles.transparent_max_bounces = 32
+        cycles.use_transparent_shadows = True
+        cycles.caustics_reflective = False
+        cycles.caustics_refractive = False
+        cycles.blur_glossy = 2.0
+
+        cycles.samples = 800
+        cycles.preview_samples = 0
+        cycles.aa_samples = 4
+        cycles.preview_aa_samples = 4
+        cycles.diffuse_samples = 1
+        cycles.glossy_samples = 1
+        cycles.transmission_samples = 1
+        cycles.ao_samples = 1
+        cycles.mesh_light_samples = 1
+        cycles.subsurface_samples = 1
+        cycles.volume_samples = 1
+        cycles.use_square_samples = False
+        cycles.progressive = 'PATH'
+        cycles.seed = 0
+        cycles.use_animated_seed = True
+        cycles.sample_clamp_direct = 0.0
+        cycles.sample_clamp_indirect = 2.0
+        cycles.sample_all_lights_direct = True
+        cycles.sample_all_lights_indirect = True
+
         return {'FINISHED'}
 
 
