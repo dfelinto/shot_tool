@@ -59,10 +59,41 @@ class ST_AssignLayersOperator(Operator):
 
     @classmethod
     def poll(cls, context):
-        return False
+        return context.scene.shot_type in {
+                SHOT_TYPE.ANIMATION,
+                SHOT_TYPE.LIGHTING,
+                }
 
     def execute(self, context):
-        TODO
+        lookup = {
+                SHOT_TYPE.ANIMATION: {
+                'Agent_high_proxy': 0,
+                'Agent_high': 10,
+                'Boris_high_proxy': 1,
+                'Boris_high': 11,
+                'Barber_high_proxy': 2,
+                'Barber_high': 12,
+                },
+                SHOT_TYPE.LIGHTING: {
+                'Agent_high_proxy': 12,
+                'Agent_high': 2,
+                'Boris_high_proxy': 13,
+                'Boris_high': 3,
+                'Barber_high_proxy': 14,
+                'Barber_high': 4,
+                },
+                }
+
+        scene = context.scene
+        objects = scene.objects
+        for name, layer in lookup.get(scene.shot_type).items():
+            ob = objects.get(name)
+
+            if not ob:
+                continue
+
+            ob.layers = [(i == layer) for i in range(20)]
+
         return {'FINISHED'}
 
 
