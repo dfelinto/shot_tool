@@ -18,6 +18,10 @@ class ST_NameActionsOperator(Operator):
     bl_idname = "shot_tool.name_actions"
     bl_label = "Name Actions"
 
+    @classmethod
+    def poll(cls, context):
+        return False
+
     def execute(self, context):
         TODO
         return {'FINISHED'}
@@ -26,6 +30,10 @@ class ST_NameActionsOperator(Operator):
 class ST_NameSceneOperator(Operator):
     bl_idname = "shot_tool.name_scene"
     bl_label = "Name Scene"
+
+    @classmethod
+    def poll(cls, context):
+        return False
 
     def execute(self, context):
         TODO
@@ -36,6 +44,10 @@ class ST_SetStampsOperator(Operator):
     bl_idname = "shot_tool.set_stamps"
     bl_label = "Set Stamps"
 
+    @classmethod
+    def poll(cls, context):
+        return False
+
     def execute(self, context):
         TODO
         return {'FINISHED'}
@@ -45,6 +57,10 @@ class ST_SetResolutionOperator(Operator):
     bl_idname = "shot_tool.set_resolution"
     bl_label = "Set Resolution"
 
+    @classmethod
+    def poll(cls, context):
+        return False
+
     def execute(self, context):
         TODO
         return {'FINISHED'}
@@ -53,6 +69,10 @@ class ST_SetResolutionOperator(Operator):
 class ST_OutputSettingsOperator(Operator):
     bl_idname = "shot_tool.output_settings"
     bl_label = "Output Settings"
+
+    @classmethod
+    def poll(cls, context):
+        return False
 
     def execute(self, context):
         TODO
@@ -67,6 +87,10 @@ class ST_CleanSequencerOperator(Operator):
     bl_idname = "shot_tool.clean_sequencer"
     bl_label = "Clean Sequencer"
 
+    @classmethod
+    def poll(cls, context):
+        return False
+
     def execute(self, context):
         TODO
         return {'FINISHED'}
@@ -75,6 +99,10 @@ class ST_CleanSequencerOperator(Operator):
 class ST_RemoveMarkersOperator(Operator):
     bl_idname = "shot_tool.remove_markers"
     bl_label = "Remove Markers"
+
+    @classmethod
+    def poll(cls, context):
+        return False
 
     def execute(self, context):
         TODO
@@ -88,6 +116,10 @@ class ST_RemoveMarkersOperator(Operator):
 class ST_HairSystemDefaultsOperator(Operator):
     bl_idname = "shot_tool.hair_system_defaults"
     bl_label = "Hair System Defaults"
+
+    @classmethod
+    def poll(cls, context):
+        return False
 
     def execute(self, context):
         TODO
