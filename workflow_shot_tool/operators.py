@@ -67,12 +67,32 @@ class ST_SetMetadataOperator(Operator):
     bl_idname = "shot_tool.set_metadata"
     bl_label = "Set Metadata"
 
-    @classmethod
-    def poll(cls, context):
-        return False
-
     def execute(self, context):
-        TODO
+        scene = context.scene
+        render = scene.render
+        shot_type = scene.shot_type
+
+
+        if shot_type == SHOT_TYPE.LAYOUT:
+            render.use_stamp = False
+
+        elif shot_type == SHOT_TYPE.ANIMATION:
+            render.use_stamp = True
+            render.stamp_font_size = 20
+            render.use_stamp_labels = True
+            render.use_stamp_frame = True
+            render.use_stamp_scene = True
+            render.use_stamp_lens = True
+            render.use_stamp_time = False
+            render.use_stamp_date = False
+            render.use_stamp_camera = False
+            render.use_stamp_render_time = False
+
+        elif shot_type == SHOT_TYPE.LIGHTING:
+            render.use_stamp = True
+            render.use_stamp_render_time = True
+            render.use_stamp_memory = True
+
         return {'FINISHED'}
 
 
