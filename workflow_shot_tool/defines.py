@@ -8,6 +8,6 @@ class SHOT_TYPE:
     """Scene.shot_type
     """
     LAYOUT = 'LA'
-    ANIM = 'AN'
+    ANIMATION = 'AN'
     LIGHTING = 'LI'
 

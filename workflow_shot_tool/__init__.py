@@ -77,7 +77,7 @@ def register():
             name="Shot Type",
             items=(
                 (SHOT_TYPE.LAYOUT, "Layout", ""),
-                (SHOT_TYPE.ANIM, "Anim", ""),
+                (SHOT_TYPE.ANIMATION, "Animation", ""),
                 (SHOT_TYPE.LIGHTING, "Lighting", ""),
                 ),
             default=SHOT_TYPE.LAYOUT,
