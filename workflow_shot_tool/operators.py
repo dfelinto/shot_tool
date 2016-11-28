@@ -100,12 +100,18 @@ class ST_SetResolutionOperator(Operator):
     bl_idname = "shot_tool.set_resolution"
     bl_label = "Set Resolution"
 
-    @classmethod
-    def poll(cls, context):
-        return False
-
     def execute(self, context):
-        TODO
+        render = context.scene.render
+        render.field_order = 'EVEN_FIRST'
+        render.fps = 24
+        render.fps_base = 1.0
+        render.pixel_aspect_x = 1.0
+        render.pixel_aspect_y = 1.0
+        render.resolution_percentage = 100
+        render.resolution_x = 2048
+        render.resolution_y = 858
+        render.use_fields = False
+        render.use_fields_still = False
         return {'FINISHED'}
 
 
