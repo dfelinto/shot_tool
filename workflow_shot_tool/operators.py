@@ -139,7 +139,8 @@ class ST_RemoveMarkersOperator(Operator):
     bl_label = "Remove Markers"
 
     def execute(self, context):
-        context.scene.timeline_markers.clear()
+        for scene in bpy.data.scenes:
+            scene.timeline_markers.clear()
         return {'FINISHED'}
 
 
