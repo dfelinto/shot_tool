@@ -87,12 +87,8 @@ class ST_RemoveSequenceStripsOperator(Operator):
     bl_idname = "shot_tool.remove_sequence_strips"
     bl_label = "Remove Sequence Strips"
 
-    @classmethod
-    def poll(cls, context):
-        return False
-
     def execute(self, context):
-        TODO
+        context.scene.sequence_editor_clear()
         return {'FINISHED'}
 
 

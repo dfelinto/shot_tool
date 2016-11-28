@@ -18,7 +18,7 @@
 
 bl_info = {
     "name": "Shot Tool",
-    "author": "Dalai Felinto, Andy Goralczyk",
+    "author": "Dalai Felinto, Andy Goralczyk, Pablo Vazquez",
     "version": (1, 0),
     "blender": (2, 78, 0),
     "location": "Tool Shelf",
