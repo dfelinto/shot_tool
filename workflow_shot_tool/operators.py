@@ -14,19 +14,6 @@ TODO = False
 # Creation
 # ############################################################
 
-class ST_NameActionsOperator(Operator):
-    bl_idname = "shot_tool.name_actions"
-    bl_label = "Name Actions"
-
-    @classmethod
-    def poll(cls, context):
-        return False
-
-    def execute(self, context):
-        TODO
-        return {'FINISHED'}
-
-
 class ST_NameSceneOperator(Operator):
     bl_idname = "shot_tool.name_scene"
     bl_label = "Name Scene"
@@ -40,9 +27,35 @@ class ST_NameSceneOperator(Operator):
         return {'FINISHED'}
 
 
-class ST_SetStampsOperator(Operator):
-    bl_idname = "shot_tool.set_stamps"
-    bl_label = "Set Stamps"
+class ST_NameActionsOperator(Operator):
+    bl_idname = "shot_tool.name_actions"
+    bl_label = "Name Actions"
+
+    @classmethod
+    def poll(cls, context):
+        return False
+
+    def execute(self, context):
+        TODO
+        return {'FINISHED'}
+
+
+class ST_AssignLayersOperator(Operator):
+    bl_idname = "shot_tool.assign_characters_layers"
+    bl_label = "Assign Characters Layers"
+
+    @classmethod
+    def poll(cls, context):
+        return False
+
+    def execute(self, context):
+        TODO
+        return {'FINISHED'}
+
+
+class ST_SetMetadataOperator(Operator):
+    bl_idname = "shot_tool.set_metadata"
+    bl_label = "Set Metadata"
 
     @classmethod
     def poll(cls, context):
@@ -66,26 +79,13 @@ class ST_SetResolutionOperator(Operator):
         return {'FINISHED'}
 
 
-class ST_OutputSettingsOperator(Operator):
-    bl_idname = "shot_tool.output_settings"
-    bl_label = "Output Settings"
-
-    @classmethod
-    def poll(cls, context):
-        return False
-
-    def execute(self, context):
-        TODO
-        return {'FINISHED'}
-
-
 # ############################################################
 # Cleanup
 # ############################################################
 
-class ST_CleanSequencerOperator(Operator):
-    bl_idname = "shot_tool.clean_sequencer"
-    bl_label = "Clean Sequencer"
+class ST_RemoveSequenceStripsOperator(Operator):
+    bl_idname = "shot_tool.remove_sequence_strips"
+    bl_label = "Remove Sequence Strips"
 
     @classmethod
     def poll(cls, context):
@@ -113,9 +113,22 @@ class ST_RemoveMarkersOperator(Operator):
 # Render
 # ############################################################
 
-class ST_HairSystemDefaultsOperator(Operator):
-    bl_idname = "shot_tool.hair_system_defaults"
-    bl_label = "Hair System Defaults"
+class ST_SetHairSystemDefaultsOperator(Operator):
+    bl_idname = "shot_tool.set_hair_system_defaults"
+    bl_label = "Set Hair System Defaults"
+
+    @classmethod
+    def poll(cls, context):
+        return False
+
+    def execute(self, context):
+        TODO
+        return {'FINISHED'}
+
+
+class ST_SetRenderDefaultsOperator(Operator):
+    bl_idname = "shot_tool.set_render_defaults"
+    bl_label = "Set Render Defaults"
 
     @classmethod
     def poll(cls, context):
@@ -131,14 +144,15 @@ class ST_HairSystemDefaultsOperator(Operator):
 # ############################################################
 
 classes = (
-        ST_NameActionsOperator,
         ST_NameSceneOperator,
-        ST_SetStampsOperator,
+        ST_NameActionsOperator,
+        ST_AssignLayersOperator,
+        ST_SetMetadataOperator,
         ST_SetResolutionOperator,
-        ST_OutputSettingsOperator,
-        ST_CleanSequencerOperator,
+        ST_RemoveSequenceStripsOperator,
         ST_RemoveMarkersOperator,
-        ST_HairSystemDefaultsOperator,
+        ST_SetHairSystemDefaultsOperator,
+        ST_SetRenderDefaultsOperator,
         )
 
 

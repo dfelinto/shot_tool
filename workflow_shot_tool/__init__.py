@@ -2,7 +2,7 @@
 #
 #  This program is free software; you can redistribute it and/or
 #  modify it under the terms of the GNU General Public License
-#  as published by the Free Software Foundation; either version 2
+#  as published by the Free Software Foundation; either version 3
 #  of the License, or (at your option) any later version.
 #
 #  This program is distributed in the hope that it will be useful,
@@ -35,15 +35,18 @@ import importlib
 from . import operators
 from . import ui
 
+from .defines import (
+        SHOT_TYPE,
+        )
+
+from bpy.props import (
+        EnumProperty,
+        StringProperty,
+        )
+
 # allow for simple refresh of addon
 importlib.reload(operators)
 importlib.reload(ui)
-
-
-from bpy.props import (
-        BoolProperty,
-        StringProperty,
-        )
 
 
 # ############################################################
@@ -58,15 +61,42 @@ class ShotToolPreferences(bpy.types.AddonPreferences):
 # Un/Register
 # ############################################################
 
+classes = (
+        ShotToolPreferences,
+        )
+
+
 def register():
-    bpy.utils.register_class(ShotToolPreferences)
+    bpy.types.Scene.shot_name = StringProperty (
+            name="Shot Name",
+            default="",
+            options={'HIDDEN'},
+            )
+
+    bpy.types.Scene.shot_type = EnumProperty (
+            name="Shot Type",
+            items=(
+                (SHOT_TYPE.LAYOUT, "Layout", ""),
+                (SHOT_TYPE.ANIM, "Anim", ""),
+                (SHOT_TYPE.LIGHTING, "Lighting", ""),
+                ),
+            default=SHOT_TYPE.LAYOUT,
+            options={'HIDDEN'},
+            )
+
+    for c in classes:
+        bpy.utils.register_class(c)
 
     operators.register()
     ui.register()
 
 
 def unregister():
-    bpy.utils.unregister_class(ShotToolPreferences)
+    del bpy.types.Scene.shot_name
+    del bpy.types.Scene.shot_type
+
+    for c in classes:
+        bpy.utils.unregister_class(c)
 
     ui.unregister()
     operators.unregister()
