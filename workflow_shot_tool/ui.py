@@ -21,7 +21,13 @@ class ST_VIEW3D_PT_tools_creation(Panel):
 
     def draw(self, context):
         layout = self.layout
-        layout.label(text="Work in progress ...")
+
+        col = layout.column()
+        col.operator("shot_tool.name_actions")
+        col.operator("shot_tool.name_scene")
+        col.operator("shot_tool.set_stamps")
+        col.operator("shot_tool.set_resolution")
+        col.operator("shot_tool.output_settings")
 
 
 class ST_VIEW3D_PT_tools_cleanup(Panel):
@@ -32,7 +38,10 @@ class ST_VIEW3D_PT_tools_cleanup(Panel):
 
     def draw(self, context):
         layout = self.layout
-        layout.label(text="Work in progress ...")
+
+        col = layout.column()
+        col.operator("shot_tool.clean_sequencer")
+        col.operator("shot_tool.remove_markers")
 
 
 class ST_VIEW3D_PT_tools_render(Panel):
@@ -43,7 +52,9 @@ class ST_VIEW3D_PT_tools_render(Panel):
 
     def draw(self, context):
         layout = self.layout
-        layout.label(text="Work in progress ...")
+
+        col = layout.column()
+        col.operator("shot_tool.hair_system_defaults")
 
 
 # ############################################################
