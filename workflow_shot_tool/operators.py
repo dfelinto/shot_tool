@@ -125,13 +125,15 @@ class ST_RelinkActionsOperator(Operator):
         # remap the old actions into the new one
         actions_count = 0
         for ob in objects:
-            action = ob.animation_data.action
-            link_action = lookup_actions.get(action.name)
+            action_name = ob.animation_data.action.name
+            link_action = lookup_actions.get(action_name)
 
             if not link_action:
                 continue
 
             ob.animation_data.action = link_action
+            print("Object \"{0}\" / Action \"{0}\"".format(
+                ob.name, action_name))
             actions_count += 1
 
         if actions_count == 0:
