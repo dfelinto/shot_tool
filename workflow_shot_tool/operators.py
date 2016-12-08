@@ -102,7 +102,19 @@ class ST_RelinkActionsOperator(Operator):
             return {'CANCELLED'}
 
         # get all the actions from the current file
-        action_names = {action.name for action in bpy.data.actions if not action.library}
+        # use the selected objects if possible
+        selected_objects = context.selected_objects
+        if selected_objects:
+            objects = [ob for ob in selected_objects if \
+                    ob.animation_data and ob.animation_data.action and \
+                    not ob.animation_data.action.library]
+            action_names = {ob.animation_data.action.name for ob in objects}
+        else:
+            objects = [ob for ob in scene.objects if \
+                    ob.animation_data and ob.animation_data.action and \
+                    not ob.animation_data.action.library]
+            action_names = {action.name for action in bpy.data.actions \
+                    if not action.library}
 
         # link all equivalent actions from the other file to populate the lookup table
         with bpy.data.libraries.load(anim_file, link=True, relative=True) as (data_from, data_to):
@@ -112,19 +124,15 @@ class ST_RelinkActionsOperator(Operator):
 
         # remap the old actions into the new one
         actions_count = 0
-        for ob in context.scene.objects:
-            if ob.animation_data:
-                action = ob.animation_data.action
+        for ob in objects:
+            action = ob.animation_data.action
+            link_action = lookup_actions.get(action.name)
 
-                if (not action) or action.library:
-                    continue
+            if not link_action:
+                continue
 
-                link_action = lookup_actions.get(action.name)
-                if not link_action:
-                    continue
-
-                ob.animation_data.action = link_action
-                actions_count += 1
+            ob.animation_data.action = link_action
+            actions_count += 1
 
         if actions_count == 0:
             self.report({'WARNING'}, "No action was relinked")
