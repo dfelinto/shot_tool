@@ -80,6 +80,63 @@ class ST_NameActionsOperator(Operator):
         return {'FINISHED'}
 
 
+class ST_RelinkActionsOperator(Operator):
+    """Relink all the actions from the equivalent anim file"""
+    bl_idname = "shot_tool.relink_actions"
+    bl_label = "Relink Actions"
+
+    def invoke(self, context, events):
+        import os
+        scene = context.scene
+
+        if scene.shot_type != SHOT_TYPE.LIGHTING:
+            self.report({'ERROR'}, "Relinking of actions is only supported in lighting shots")
+            return {'CANCELLED'}
+
+        # get the equivalent animation file
+        basedir, basename = os.path.split(bpy.data.filepath)
+        anim_file = os.path.join(basedir, "{0}.anim.blend".format(scene.shot_name))
+
+        if not os.path.exists(anim_file):
+            self.report({'ERROR'}, "Animation file not found ({0})".format(anim_file))
+            return {'CANCELLED'}
+
+        # get all the actions from the current file
+        action_names = {action.name for action in bpy.data.actions if not action.library}
+
+        # link all equivalent actions from the other file to populate the lookup table
+        with bpy.data.libraries.load(anim_file, link=True, relative=True) as (data_from, data_to):
+            data_to.actions = [action for action in data_from.actions if action in action_names]
+
+        lookup_actions = {action.name: action for action in data_to.actions}
+
+        # remap the old actions into the new one
+        actions_count = 0
+        for ob in context.scene.objects:
+            if ob.animation_data:
+                action = ob.animation_data.action
+
+                if (not action) or action.library:
+                    continue
+
+                link_action = lookup_actions.get(action.name)
+                if not link_action:
+                    continue
+
+                ob.animation_data.action = link_action
+                actions_count += 1
+
+        if actions_count == 0:
+            self.report({'WARNING'}, "No action was relinked")
+            return {'CANCELLED'}
+
+        else:
+            self.report({'INFO'}, "{0} action{1} relinked".format(
+                actions_count, " was" if actions_count == 1 else "s were"))
+
+        return {'FINISHED'}
+
+
 class ST_AssignLayersOperator(Operator):
     """This puts the character group instances and their proxies on layers, depending on the file type"""
     bl_idname = "shot_tool.assign_characters_layers"
@@ -267,6 +324,7 @@ class ST_SetRenderDefaultsOperator(Operator):
 classes = (
         ST_NameSceneOperator,
         ST_NameActionsOperator,
+        ST_RelinkActionsOperator,
         ST_AssignLayersOperator,
         ST_SetMetadataOperator,
         ST_SetResolutionOperator,

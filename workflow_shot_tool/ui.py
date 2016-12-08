@@ -8,6 +8,10 @@ from bpy.types import (
         Panel,
         )
 
+from .defines import (
+        SHOT_TYPE,
+        )
+
 
 # ############################################################
 # Toolshelf Viewport
@@ -22,6 +26,7 @@ class ST_VIEW3D_PT_tools_creation(Panel):
     def draw(self, context):
         layout = self.layout
         scene = context.scene
+        shot_type = scene.shot_type
 
         col = layout.column()
         col.prop(scene, "shot_name")
@@ -29,7 +34,9 @@ class ST_VIEW3D_PT_tools_creation(Panel):
         col.separator()
 
         col.operator("shot_tool.name_scene")
-        col.operator("shot_tool.name_actions")
+        col.operator("shot_tool.relink_actions" \
+                if shot_type == SHOT_TYPE.LIGHTING \
+                else "shot_tool.name_actions")
         col.operator("shot_tool.assign_characters_layers")
         col.operator("shot_tool.set_metadata")
         col.operator("shot_tool.set_resolution")
