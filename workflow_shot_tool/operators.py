@@ -8,6 +8,10 @@ from bpy.types import (
         Operator,
         )
 
+from bpy.props import (
+        FloatVectorProperty,
+        )
+
 from .defines import (
         SHOT_TYPE,
         )
@@ -328,6 +332,52 @@ class ST_SetRenderDefaultsOperator(Operator):
 
 
 # ############################################################
+# Miscellaneous
+# ############################################################
+
+class ST_SetVertexColorOperator(Operator):
+    """Set vertex color for selected vertices"""
+    bl_idname = "shot_tool.set_vertex_color"
+    bl_label = "Set Vertex Color"
+    bl_context = 'edit_mesh'
+
+    color = FloatVectorProperty(
+            name='Color',
+            subtype='COLOR',
+            default=(1.0, 1.0, 1.0),
+            )
+
+    def execute(self, context):
+        bpy.ops.ed.undo_push(message=self.bl_idname)
+
+        ob = context.object
+        mesh = ob.data
+
+        # go to object mode to get polygon data
+        bpy.ops.object.mode_set(mode='OBJECT')
+
+        color_layer = mesh.vertex_colors.active
+        if not color_layer:
+            color_layer = mesh.vertex_colors.new()
+
+        color = self.color
+        selected_vertices = [i for i, v in enumerate(mesh.vertices) if v.select]
+        i = 0
+        for poly in mesh.polygons:
+            for v_id in poly.vertices:
+                if v_id in selected_vertices:
+                    color_layer.data[i].color = color
+                i += 1
+
+        bpy.ops.object.mode_set(mode='VERTEX_PAINT')
+        return {'FINISHED'}
+
+    def invoke(self, context, event):
+        wm = context.window_manager
+        return wm.invoke_props_dialog(self, width=200)
+
+
+# ############################################################
 # Un/Register
 # ############################################################
 
@@ -342,6 +392,7 @@ classes = (
         ST_RemoveMarkersOperator,
         ST_SetHairSystemDefaultsOperator,
         ST_SetRenderDefaultsOperator,
+        ST_SetVertexColorOperator,
         )
 
 
