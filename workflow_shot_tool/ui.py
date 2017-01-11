@@ -22,6 +22,7 @@ class ST_VIEW3D_PT_tools_creation(Panel):
     bl_region_type = 'TOOLS'
     bl_category = 'Shot Tool'
     bl_label = "Creation"
+    bl_context = 'objectmode'
 
     def draw(self, context):
         layout = self.layout
@@ -53,6 +54,7 @@ class ST_VIEW3D_PT_tools_cleanup(Panel):
     bl_region_type = 'TOOLS'
     bl_category = 'Shot Tool'
     bl_label = "Cleanup"
+    bl_context = 'objectmode'
 
     def draw(self, context):
         layout = self.layout
@@ -67,6 +69,7 @@ class ST_VIEW3D_PT_tools_render(Panel):
     bl_region_type = 'TOOLS'
     bl_category = 'Shot Tool'
     bl_label = "Render"
+    bl_context = 'objectmode'
 
     def draw(self, context):
         layout = self.layout
