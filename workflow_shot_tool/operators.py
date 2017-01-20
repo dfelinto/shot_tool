@@ -6,6 +6,7 @@ import bpy
 
 from bpy.types import (
         Operator,
+        PointerProperty,
         )
 
 from bpy.props import (
@@ -29,6 +30,11 @@ def get_animation_file(context):
     anim_file = os.path.join(basedir, "{0}.{1}.blend".format(context.scene.shot_name,
         SHOT_TYPE.suffix.get(SHOT_TYPE.ANIMATION)))
     return anim_file
+
+
+def get_rna_properties(ob):
+    bl_rna_private = {'rna_type', 'name', 'type', 'is_valid', 'error_location', 'error_rotation', 'is_proxy_local', 'active'}
+    return [(key, value) for (key, value) in ob.bl_rna.properties.items() if key not in bl_rna_private]
 
 
 # ############################################################
@@ -372,8 +378,107 @@ class ST_UpdateBoneConstraintsOperator(Operator):
         if not self._valid(context):
             return {'CANCELLED'}
 
-        self.report({'ERROR'}, "Not implemented yet")
-        return {'CANCELLED'}
+        scene = context.scene
+
+        # get all the actions from the current file
+        # use the selected objects if possible
+        objects = context.selected_objects
+        if not objects:
+            objects = scene.objects
+
+        armatures = [ob for ob in objects if ob.type == 'ARMATURE']
+        armatures_names = {ob.name for ob in armatures}
+
+        anim_file = get_animation_file(context)
+        with bpy.data.libraries.load(anim_file, link=True, relative=True) as (data_from, data_to):
+            data_to.objects = [ob for ob in data_from.objects if ob in armatures_names]
+
+        lookup_armatures = {ob.name: ob for ob in data_to.objects}
+
+        # remove existing
+        constraints_del = 0
+        constraints_add = 0
+        bones_mismatch = []
+        armatures_mismatch = []
+        targets_mismatch = []
+
+        scene_objects = scene.objects
+        active_object = scene_objects.active
+
+        for ob in armatures:
+
+            reference_armature = lookup_armatures.get(ob.name)
+            if not reference_armature:
+                armatures_mismatch.append(ob.name)
+                continue
+
+            scene_objects.active = ob
+            bpy.ops.object.mode_set(mode='POSE')
+
+            for bone in ob.pose.bones:
+
+                reference_bone = reference_armature.pose.bones.get(bone.name)
+                if not reference_bone:
+                    bones_mismatch.append(bone.name)
+                    continue
+
+                # first delete them all
+                bone_constraints = bone.constraints
+                to_del = [constraint for constraint in bone_constraints if constraint.is_proxy_local]
+
+                len_bc = len(bone_constraints)
+                len_td = len(to_del)
+
+                constraints_del += len_td
+
+                while to_del:
+                    constraint = to_del.pop()
+                    bone_constraints.remove(constraint)
+
+                assert len_bc - len_td == len(bone_constraints)
+
+                # secondly, create new constraints
+                to_copy = [constraint for constraint in reference_bone.constraints if constraint.is_proxy_local]
+                for constraint in to_copy:
+                    constraint_new = bone_constraints.new(constraint.type)
+                    constraint_new.is_proxy_local = True
+
+                    constraints_add += 1
+
+                    for (key, value) in get_rna_properties(constraint):
+                        if type(value) == PointerProperty:
+                            target_name = getattr(constraint, key).name
+                            target = scene_objects.get(target_name)
+
+                            if not target:
+                                targets_mismatch.append(target_name)
+                                continue
+
+                            setattr(constraint_new, key, target)
+                        else:
+                            setattr(constraint_new, key, getattr(constraint, key))
+
+                bpy.ops.object.mode_set(mode='OBJECT')
+
+            # restore original active object
+            scene_objects.active = active_object
+
+        if armatures_mismatch:
+            self.report({'ERROR'}, "{0} armatures not found in animation file".format(len(armatures_mismatch)))
+            print("Mismatching armatures: {0}".format(armatures_mismatch))
+
+        if bones_mismatch:
+            self.report({'ERROR'}, "{0} bones not found in animation file".format(len(bones_mismatch)))
+            print("Mismatching bones: {0}".format(bones_mismatch))
+
+        if targets_mismatch:
+            self.report({'ERROR'}, "{0} targets not found in animation file".format(len(targets_mismatch)))
+            print("Mismatching targets: {0}".format(targets_mismatch))
+
+        if constraints_del or constraints_add:
+            self.report({'INFO'}, "{0} constraints deleted, {1} constraints added".format(constraints_del, constraints_add))
+
+        return {'FINISHED'}
 
 
 # ############################################################
