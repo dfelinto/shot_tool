@@ -18,6 +18,19 @@ from .defines import (
 
 TODO = False
 
+
+# ############################################################
+# Utils
+# ############################################################
+
+def get_animation_file(context):
+    import os
+    basedir, basename = os.path.split(bpy.data.filepath)
+    anim_file = os.path.join(basedir, "{0}.{1}.blend".format(context.scene.shot_name,
+        SHOT_TYPE.suffix.get(SHOT_TYPE.ANIMATION)))
+    return anim_file
+
+
 # ############################################################
 # Creation
 # ############################################################
@@ -92,8 +105,7 @@ class ST_RelinkActionsOperator(Operator):
             return {'CANCELLED'}
 
         # get the equivalent animation file
-        basedir, basename = os.path.split(bpy.data.filepath)
-        anim_file = os.path.join(basedir, "{0}.anim.blend".format(scene.shot_name))
+        anim_file = get_animation_file(context)
 
         if not os.path.exists(anim_file):
             self.report({'ERROR'}, "Animation file not found ({0})".format(anim_file))
@@ -335,18 +347,6 @@ class ST_UpdateBoneConstraintsOperator(Operator):
     bl_label = "Update Bone Constraints"
     bl_context = 'objectmode'
 
-    @staticmethod
-    def _get_animation_file():
-        """Get animation file relative to this lighting file
-        """
-        import os
-        basedir, basename = os.path.split(bpy.data.filepath)
-        index = basename.rfind(SHOT_TYPE.suffix.get(SHOT_TYPE.LIGHTING))
-        assert index != -1
-        filename = "{0}{1}.blend".format(basename[:index],
-                SHOT_TYPE.suffix.get(SHOT_TYPE.ANIMATION))
-        return os.path.join(basedir, filename)
-
     def _valid(self, context):
         import os
 
@@ -361,7 +361,7 @@ class ST_UpdateBoneConstraintsOperator(Operator):
             return False
 
         # check if there is an anim file
-        animfile = self._get_animation_file()
+        animfile = get_animation_file(context)
         if not os.path.isfile(animfile):
             self.report({'ERROR'}, "There is no anim file ({0})".format(animfile))
             return False
