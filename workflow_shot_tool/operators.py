@@ -28,16 +28,10 @@ class ST_NameSceneOperator(Operator):
     bl_label = "Name Scene"
 
     def execute(self, context):
-        names = {
-                SHOT_TYPE.LAYOUT: 'layout',
-                SHOT_TYPE.ANIMATION: 'anim',
-                SHOT_TYPE.LIGHTING: 'lighting',
-                }
-
         scene = context.scene
         scene.name = "{0}.{1}".format(
                 scene.shot_name,
-                names.get(scene.shot_type),
+                SHOT_TYPE.suffix.get(scene.shot_type),
                 )
         return {'FINISHED'}
 
@@ -341,7 +335,48 @@ class ST_UpdateBoneConstraintsOperator(Operator):
     bl_label = "Update Bone Constraints"
     bl_context = 'objectmode'
 
+    @staticmethod
+    def _get_animation_file():
+        """Get animation file relative to this lighting file
+        """
+        import os
+        basedir, basename = os.path.split(bpy.data.filepath)
+        index = basename.rfind(SHOT_TYPE.suffix.get(SHOT_TYPE.LIGHTING))
+        assert index != -1
+        filename = "{0}{1}.blend".format(basename[:index],
+                SHOT_TYPE.suffix.get(SHOT_TYPE.ANIMATION))
+        return os.path.join(basedir, filename)
+
+    def _valid(self, context):
+        import os
+
+        # check if file was ever saved
+        if not context.blend_data.is_saved:
+            self.report({'ERROR'}, "Save the file first")
+            return False
+
+        # check if file is lighting
+        if not bpy.data.filepath.endswith("{0}.blend".format(SHOT_TYPE.suffix.get(SHOT_TYPE.LIGHTING))):
+            self.report({'ERROR'}, "Current file is not a lighting file")
+            return False
+
+        # check if there is an anim file
+        animfile = self._get_animation_file()
+        if not os.path.isfile(animfile):
+            self.report({'ERROR'}, "There is no anim file ({0})".format(animfile))
+            return False
+
+        # check if file is saved
+        if context.blend_data.is_dirty:
+            self.report({'ERROR'}, "Save the file before running")
+            return False
+
+        return True
+
     def execute(self, context):
+        if not self._valid(context):
+            return {'CANCELLED'}
+
         self.report({'ERROR'}, "Not implemented yet")
         return {'CANCELLED'}
 

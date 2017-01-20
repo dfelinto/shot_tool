@@ -11,3 +11,9 @@ class SHOT_TYPE:
     ANIMATION = 'AN'
     LIGHTING = 'LI'
 
+    suffix = {
+            LAYOUT: 'layout',
+            ANIMATION: 'anim',
+            LIGHTING: 'lighting',
+            }
+
