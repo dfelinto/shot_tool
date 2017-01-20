@@ -356,7 +356,7 @@ class ST_UpdateBoneConstraintsOperator(Operator):
             return False
 
         # check if file is lighting
-        if not bpy.data.filepath.endswith("{0}.blend".format(SHOT_TYPE.suffix.get(SHOT_TYPE.LIGHTING))):
+        if context.scene.shot_type != SHOT_TYPE.LIGHTING:
             self.report({'ERROR'}, "Current file is not a lighting file")
             return False
 
