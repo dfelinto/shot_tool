@@ -366,11 +366,6 @@ class ST_UpdateBoneConstraintsOperator(Operator):
             self.report({'ERROR'}, "There is no anim file ({0})".format(animfile))
             return False
 
-        # check if file is saved
-        if context.blend_data.is_dirty:
-            self.report({'ERROR'}, "Save the file before running")
-            return False
-
         return True
 
     def execute(self, context):
