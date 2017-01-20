@@ -79,6 +79,24 @@ class ST_VIEW3D_PT_tools_render(Panel):
         col.operator("shot_tool.set_render_defaults")
 
 
+class ST_VIEW3D_PT_tools_update(Panel):
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'TOOLS'
+    bl_category = 'Shot Tool'
+    bl_label = "Update"
+    bl_context = 'objectmode'
+
+    @classmethod
+    def poll(cls, context):
+        return context.scene.shot_type == SHOT_TYPE.LIGHTING
+
+    def draw(self, context):
+        layout = self.layout
+
+        col = layout.column()
+        col.operator("shot_tool.update_bone_constraints", icon='CONSTRAINT_BONE')
+
+
 class ST_VIEW3D_PT_tools_misc(Panel):
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'TOOLS'
@@ -101,6 +119,7 @@ classes = (
         ST_VIEW3D_PT_tools_creation,
         ST_VIEW3D_PT_tools_cleanup,
         ST_VIEW3D_PT_tools_render,
+        ST_VIEW3D_PT_tools_update,
         ST_VIEW3D_PT_tools_misc,
         )
 

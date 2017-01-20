@@ -332,6 +332,21 @@ class ST_SetRenderDefaultsOperator(Operator):
 
 
 # ############################################################
+# Update
+# ############################################################
+
+class ST_UpdateBoneConstraintsOperator(Operator):
+    """Re-syinc bone constraints from animation file"""
+    bl_idname = "shot_tool.update_bone_constraints"
+    bl_label = "Update Bone Constraints"
+    bl_context = 'objectmode'
+
+    def execute(self, context):
+        self.report({'ERROR'}, "Not implemented yet")
+        return {'CANCELLED'}
+
+
+# ############################################################
 # Miscellaneous
 # ############################################################
 
@@ -393,6 +408,7 @@ classes = (
         ST_SetHairSystemDefaultsOperator,
         ST_SetRenderDefaultsOperator,
         ST_SetVertexColorOperator,
+        ST_UpdateBoneConstraintsOperator,
         )
 
 
