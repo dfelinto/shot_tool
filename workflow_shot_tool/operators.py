@@ -37,6 +37,16 @@ def get_rna_properties(ob):
     return [(key, value) for (key, value) in ob.bl_rna.properties.items() if key not in bl_rna_private]
 
 
+def get_library_from_library(external_library):
+    if not external_library:
+        return None
+
+    filepath = external_library.filepath
+    for library in bpy.data.libraries:
+        if (library is not external_library) and (library.filepath == filepath):
+            return library
+
+
 # ############################################################
 # Creation
 # ############################################################
@@ -403,6 +413,7 @@ class ST_UpdateBoneConstraintsOperator(Operator):
         targets_mismatch = []
 
         scene_objects = scene.objects
+        data_objects = bpy.data.objects
         active_object = scene_objects.active
 
         for ob in armatures:
@@ -424,37 +435,32 @@ class ST_UpdateBoneConstraintsOperator(Operator):
 
                 # first delete them all
                 bone_constraints = bone.constraints
-                to_del = [constraint for constraint in bone_constraints if constraint.is_proxy_local]
+                constraints_del += len(bone_constraints)
 
-                len_bc = len(bone_constraints)
-                len_td = len(to_del)
-
-                constraints_del += len_td
-
-                while to_del:
-                    constraint = to_del.pop()
-                    bone_constraints.remove(constraint)
-
-                assert len_bc - len_td == len(bone_constraints)
+                while bone_constraints:
+                    bone_constraints.remove(bone_constraints[0])
 
                 # secondly, create new constraints
-                to_copy = [constraint for constraint in reference_bone.constraints if constraint.is_proxy_local]
-                for constraint in to_copy:
+                for constraint in reference_bone.constraints:
                     constraint_new = bone_constraints.new(constraint.type)
-                    constraint_new.is_proxy_local = True
-
+                    constraint_new.is_proxy_local = False
                     constraints_add += 1
 
                     for (key, value) in get_rna_properties(constraint):
                         if type(value) == PointerProperty:
-                            target_name = getattr(constraint, key).name
+                            target_source = getattr(constraint, key)
+                            target_name = target_source.name
+
                             target = scene_objects.get(target_name)
 
                             if not target:
-                                targets_mismatch.append(target_name)
-                                continue
+                                library_local = get_library_from_library(target_source.library)
+                                target = data_objects.get(target_name, library_local)
 
-                            setattr(constraint_new, key, target)
+                            if not target:
+                                targets_mismatch.append(target_name)
+                            else:
+                                setattr(constraint_new, key, target)
                         else:
                             setattr(constraint_new, key, getattr(constraint, key))
 
@@ -464,18 +470,18 @@ class ST_UpdateBoneConstraintsOperator(Operator):
             scene_objects.active = active_object
 
         if armatures_mismatch:
-            self.report({'ERROR'}, "{0} armatures not found in animation file".format(len(armatures_mismatch)))
-            print("Mismatching armatures: {0}".format(armatures_mismatch))
+            self.report({'ERROR'}, "{0} armatures not found in animation file, see console".format(len(armatures_mismatch)))
+            print("Mismatching armatures: {0}".format(','.join(armatures_mismatch)))
 
         if bones_mismatch:
-            self.report({'ERROR'}, "{0} bones not found in animation file".format(len(bones_mismatch)))
-            print("Mismatching bones: {0}".format(bones_mismatch))
+            self.report({'ERROR'}, "{0} bones not found in animation file, see console".format(len(bones_mismatch)))
+            print("Mismatching bones: {0}".format(','.join(bones_mismatch)))
 
         if targets_mismatch:
-            self.report({'ERROR'}, "{0} targets not found in animation file".format(len(targets_mismatch)))
-            print("Mismatching targets: {0}".format(targets_mismatch))
+            self.report({'ERROR'}, "{0} targets not found in animation file, see console".format(len(targets_mismatch)))
+            print("Mismatching targets: {0}".format(','.join(targets_mismatch)))
 
-        if constraints_del or constraints_add:
+        if (constraints_del or constraints_add) and not (armatures_mismatch or bones_mismatch or targets_mismatch):
             self.report({'INFO'}, "{0} constraints deleted, {1} constraints added".format(constraints_del, constraints_add))
 
         return {'FINISHED'}
