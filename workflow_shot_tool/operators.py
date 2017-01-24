@@ -332,23 +332,24 @@ class ST_SetRenderDefaultsOperator(Operator):
 
         cycles.samples = 800
         cycles.preview_samples = 0
-        cycles.aa_samples = 4
-        cycles.preview_aa_samples = 4
-        cycles.diffuse_samples = 1
-        cycles.glossy_samples = 1
+        cycles.aa_samples = 32
+        cycles.preview_aa_samples = 32
+        cycles.diffuse_samples = 2
+        cycles.glossy_samples = 2
         cycles.transmission_samples = 1
         cycles.ao_samples = 1
         cycles.mesh_light_samples = 1
-        cycles.subsurface_samples = 1
+        cycles.subsurface_samples = 2
         cycles.volume_samples = 1
         cycles.use_square_samples = False
-        cycles.progressive = 'PATH'
+        cycles.progressive = 'BRANCHED_PATH'
         cycles.seed = 0
         cycles.use_animated_seed = True
         cycles.sample_clamp_direct = 0.0
-        cycles.sample_clamp_indirect = 2.0
+        cycles.sample_clamp_indirect = 10.0
         cycles.sample_all_lights_direct = True
         cycles.sample_all_lights_indirect = True
+        cycles.use_progressive_refine = False
 
         return {'FINISHED'}
 
