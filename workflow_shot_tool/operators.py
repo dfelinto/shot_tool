@@ -429,6 +429,7 @@ class ST_UpdateBoneConstraintsOperatorCommon(object):
                 continue
 
             scene_objects.active = ob
+            object_mode = ob.mode
             bpy.ops.object.mode_set(mode='POSE')
 
             for bone in self.get_pose_bones(context, ob):
@@ -479,7 +480,7 @@ class ST_UpdateBoneConstraintsOperatorCommon(object):
                         else:
                             setattr(constraint_new, key, getattr(constraint, key))
 
-                bpy.ops.object.mode_set(mode='OBJECT')
+            bpy.ops.object.mode_set(mode=object_mode)
 
             # restore original active object
             scene_objects.active = active_object
