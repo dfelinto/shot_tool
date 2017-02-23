@@ -364,12 +364,7 @@ class ST_SetRenderDefaultsOperator(Operator):
 # Update
 # ############################################################
 
-class ST_UpdateBoneConstraintsOperator(Operator):
-    """Re-syinc bone constraints from animation file"""
-    bl_idname = "shot_tool.update_bone_constraints"
-    bl_label = "Update Bone Constraints"
-    bl_context = 'objectmode'
-
+class ST_UpdateBoneConstraintsOperatorCommon(object):
     def _valid(self, context):
         import os
 
@@ -395,13 +390,14 @@ class ST_UpdateBoneConstraintsOperator(Operator):
         if not self._valid(context):
             return {'CANCELLED'}
 
+        # constraints to ignore
+        constraints_blacklist = {
+                'ACTION',
+                }
+
         scene = context.scene
 
-        # get all the actions from the current file
-        # use the selected objects if possible
-        objects = context.selected_objects
-        if not objects:
-            objects = scene.objects
+        objects = self.get_objects(context)
 
         armatures = [ob for ob in objects if ob.type == 'ARMATURE']
         armatures_names = {ob.name for ob in armatures}
@@ -424,31 +420,40 @@ class ST_UpdateBoneConstraintsOperator(Operator):
         active_object = scene_objects.active
 
         for ob in armatures:
+            ob_name = ob.name
+            print("Processing: {0}".format(ob_name))
 
-            reference_armature = lookup_armatures.get(ob.name)
+            reference_armature = lookup_armatures.get(ob_name)
             if not reference_armature:
-                armatures_mismatch.append(ob.name)
+                armatures_mismatch.append(ob_name)
                 continue
 
             scene_objects.active = ob
             bpy.ops.object.mode_set(mode='POSE')
 
-            for bone in ob.pose.bones:
+            for bone in self.get_pose_bones(context, ob):
+                bone_name = bone.name
+                print("Processing: {0}:{1}".format(ob_name, bone_name))
 
-                reference_bone = reference_armature.pose.bones.get(bone.name)
+                reference_bone = reference_armature.pose.bones.get(bone_name)
                 if not reference_bone:
-                    bones_mismatch.append(bone.name)
+                    bones_mismatch.append(bone_name)
                     continue
 
                 # first delete them all
                 bone_constraints = bone.constraints
-                constraints_del += len(bone_constraints)
+                bone_constraints_valid = [c for c in bone_constraints if c.type not in constraints_blacklist]
+                constraints_del += len(bone_constraints_valid)
 
-                while bone_constraints:
-                    bone_constraints.remove(bone_constraints[0])
+                while bone_constraints_valid:
+                    constraint = bone_constraints_valid.pop()
+                    bone_constraints.remove(constraint)
 
                 # secondly, create new constraints
                 for constraint in reference_bone.constraints:
+                    if constraint.type in constraints_blacklist:
+                        continue
+
                     constraint_new = bone_constraints.new(constraint.type)
                     constraint_new.is_proxy_local = False
                     constraints_add += 1
@@ -456,8 +461,11 @@ class ST_UpdateBoneConstraintsOperator(Operator):
                     for (key, value) in get_rna_properties(constraint):
                         if type(value) == PointerProperty:
                             target_source = getattr(constraint, key)
-                            target_name = target_source.name
 
+                            if not target_source:
+                                continue
+
+                            target_name = target_source.name
                             target = scene_objects.get(target_name)
 
                             if not target:
@@ -492,6 +500,38 @@ class ST_UpdateBoneConstraintsOperator(Operator):
             self.report({'INFO'}, "{0} constraints deleted, {1} constraints added".format(constraints_del, constraints_add))
 
         return {'FINISHED'}
+
+
+class ST_UpdateBoneConstraintsOperator(ST_UpdateBoneConstraintsOperatorCommon, Operator):
+    """Re-syinc bone constraints from animation file"""
+    bl_idname = "shot_tool.update_bone_constraints"
+    bl_label = "Update Bone Constraints"
+    bl_context = 'objectmode'
+
+    def get_objects(self, context):
+        """
+        Use the selected objects if possible
+        """
+        objects = context.selected_objects
+        if not objects:
+            objects = scene.objects
+        return objects
+
+    def get_pose_bones(self, context, ob):
+        return ob.pose.bones
+
+
+class ST_UpdatePoseBoneConstraintsOperator(ST_UpdateBoneConstraintsOperatorCommon, Operator):
+    """Re-syinc bone constraints from animation file"""
+    bl_idname = "shot_tool.update_pose_bone_constraints"
+    bl_label = "Update Pose Bone Constraints"
+    bl_context = 'posemode'
+
+    def get_objects(self, context):
+        return [context.object]
+
+    def get_pose_bones(self, context, ob):
+        return context.selected_pose_bones
 
 
 # ############################################################
@@ -557,6 +597,7 @@ classes = (
         ST_SetRenderDefaultsOperator,
         ST_SetVertexColorOperator,
         ST_UpdateBoneConstraintsOperator,
+        ST_UpdatePoseBoneConstraintsOperator,
         )
 
 

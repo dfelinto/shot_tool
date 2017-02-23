@@ -111,6 +111,24 @@ class ST_VIEW3D_PT_tools_misc(Panel):
         col.operator("shot_tool.set_vertex_color", icon='VPAINT_HLT')
 
 
+class ST_VIEW3D_PT_tools_update_pose(Panel):
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'TOOLS'
+    bl_category = 'Shot Tool'
+    bl_label = "Update"
+    bl_context = 'posemode'
+
+    @classmethod
+    def poll(cls, context):
+        return context.scene.shot_type == SHOT_TYPE.LIGHTING
+
+    def draw(self, context):
+        layout = self.layout
+
+        col = layout.column()
+        col.operator("shot_tool.update_pose_bone_constraints", icon='CONSTRAINT_BONE')
+
+
 # ############################################################
 # Un/Register
 # ############################################################
@@ -120,6 +138,7 @@ classes = (
         ST_VIEW3D_PT_tools_cleanup,
         ST_VIEW3D_PT_tools_render,
         ST_VIEW3D_PT_tools_update,
+        ST_VIEW3D_PT_tools_update_pose,
         ST_VIEW3D_PT_tools_misc,
         )
 
