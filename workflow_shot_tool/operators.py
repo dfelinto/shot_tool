@@ -33,8 +33,14 @@ def get_animation_file(context):
 
 
 def get_rna_properties(ob):
+    """
+    Return target and subtarget first
+    otherwise properties like target_space are not accessible
+    """
     bl_rna_private = {'rna_type', 'name', 'type', 'is_valid', 'error_location', 'error_rotation', 'is_proxy_local', 'active'}
-    return [(key, value) for (key, value) in ob.bl_rna.properties.items() if key not in bl_rna_private]
+    properties = [(key, value) for (key, value) in ob.bl_rna.properties.items() if key not in bl_rna_private]
+    properties.sort(key=lambda x: x[0] not in {'target', 'subtarget'})
+    return properties
 
 
 def get_library_from_library(external_library):
