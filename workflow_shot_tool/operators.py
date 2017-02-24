@@ -427,6 +427,7 @@ class ST_UpdateBoneConstraintsOperatorCommon(object):
             if not reference_armature:
                 armatures_mismatch.append(ob_name)
                 continue
+            assert ob != reference_armature, "Eek, ob %s is ref armature %s" % (ob.name, reference_armature.name)
 
             scene_objects.active = ob
             object_mode = ob.mode
@@ -449,19 +450,26 @@ class ST_UpdateBoneConstraintsOperatorCommon(object):
                 while bone_constraints_valid:
                     constraint = bone_constraints_valid.pop()
                     bone_constraints.remove(constraint)
+                print('There are %i constraints left' % (len(bone_constraints)))
 
                 # secondly, create new constraints
-                for constraint in reference_bone.constraints:
+                for constraint in reversed(reference_bone.constraints):
                     if constraint.type in constraints_blacklist:
+                        print('Skipping constraint %s' % constraint.name)
                         continue
 
                     constraint_new = bone_constraints.new(constraint.type)
                     constraint_new.is_proxy_local = False
                     constraints_add += 1
 
+                    if constraint.name == 'Track To':
+                        continue
+
                     for (key, value) in get_rna_properties(constraint):
+                        realvalue = getattr(constraint, key)
+
                         if type(value) == PointerProperty:
-                            target_source = getattr(constraint, key)
+                            target_source = realvalue
 
                             if not target_source:
                                 continue
@@ -475,10 +483,16 @@ class ST_UpdateBoneConstraintsOperatorCommon(object):
 
                             if not target:
                                 targets_mismatch.append(target_name)
-                            else:
-                                setattr(constraint_new, key, target)
-                        else:
-                            setattr(constraint_new, key, getattr(constraint, key))
+                                continue
+
+                            realvalue = target
+
+                        if constraint.name == 'Track To' and key not in {'track_axis', 'up_axis'}:
+                            print('SKIPPING setattr(%r, %r, %r)' % (constraint_new, key, realvalue))
+                            continue
+
+                        setattr(constraint_new, key, realvalue)
+                        print('setattr(%r, %r, %r)' % (constraint_new, key, realvalue))
 
             bpy.ops.object.mode_set(mode=object_mode)
 
@@ -610,4 +624,3 @@ def register():
 def unregister():
     for c in classes:
         bpy.utils.unregister_class(c)
-
