@@ -435,7 +435,7 @@ class ST_UpdateBoneConstraintsOperatorCommon(object):
 
             for bone in self.get_pose_bones(context, ob):
                 bone_name = bone.name
-                print("Processing: {0}:{1}".format(ob_name, bone_name))
+                print("Processing: {0}.{1}".format(ob_name, bone_name))
 
                 reference_bone = reference_armature.pose.bones.get(bone_name)
                 if not reference_bone:
@@ -449,6 +449,7 @@ class ST_UpdateBoneConstraintsOperatorCommon(object):
 
                 while bone_constraints_valid:
                     constraint = bone_constraints_valid.pop()
+                    print('Deleting constraint %s' % constraint.name)
                     bone_constraints.remove(constraint)
                 print('There are %i constraints left' % (len(bone_constraints)))
 
@@ -457,6 +458,9 @@ class ST_UpdateBoneConstraintsOperatorCommon(object):
                     if constraint.type in constraints_blacklist:
                         print('Skipping constraint %s' % constraint.name)
                         continue
+                    else:
+                        print('Copying constraint %s (%s)' % (constraint.name, \
+                                "Proxy Local" if constraint.is_proxy_local else "Non Proxy Local"))
 
                     constraint_new = bone_constraints.new(constraint.type)
                     constraint_new.is_proxy_local = constraint.is_proxy_local
@@ -485,7 +489,7 @@ class ST_UpdateBoneConstraintsOperatorCommon(object):
                             realvalue = target
 
                         setattr(constraint_new, key, realvalue)
-                        print('setattr(%r, %r, %r)' % (constraint_new, key, realvalue))
+                        #print('setattr(%r, %r, %r)' % (constraint_new, key, realvalue))
 
             bpy.ops.object.mode_set(mode=object_mode)
 
