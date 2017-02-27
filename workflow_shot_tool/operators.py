@@ -453,7 +453,7 @@ class ST_UpdateBoneConstraintsOperatorCommon(object):
                 print('There are %i constraints left' % (len(bone_constraints)))
 
                 # secondly, create new constraints
-                for constraint in reversed(reference_bone.constraints):
+                for constraint in reference_bone.constraints:
                     if constraint.type in constraints_blacklist:
                         print('Skipping constraint %s' % constraint.name)
                         continue
@@ -461,9 +461,6 @@ class ST_UpdateBoneConstraintsOperatorCommon(object):
                     constraint_new = bone_constraints.new(constraint.type)
                     constraint_new.is_proxy_local = False
                     constraints_add += 1
-
-                    if constraint.name == 'Track To':
-                        continue
 
                     for (key, value) in get_rna_properties(constraint):
                         realvalue = getattr(constraint, key)
@@ -486,10 +483,6 @@ class ST_UpdateBoneConstraintsOperatorCommon(object):
                                 continue
 
                             realvalue = target
-
-                        if constraint.name == 'Track To' and key not in {'track_axis', 'up_axis'}:
-                            print('SKIPPING setattr(%r, %r, %r)' % (constraint_new, key, realvalue))
-                            continue
 
                         setattr(constraint_new, key, realvalue)
                         print('setattr(%r, %r, %r)' % (constraint_new, key, realvalue))
