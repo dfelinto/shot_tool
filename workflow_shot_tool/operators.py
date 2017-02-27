@@ -459,7 +459,7 @@ class ST_UpdateBoneConstraintsOperatorCommon(object):
                         continue
 
                     constraint_new = bone_constraints.new(constraint.type)
-                    constraint_new.is_proxy_local = False
+                    constraint_new.is_proxy_local = constraint.is_proxy_local
                     constraints_add += 1
 
                     for (key, value) in get_rna_properties(constraint):
