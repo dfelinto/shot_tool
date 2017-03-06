@@ -88,13 +88,19 @@ class ST_VIEW3D_PT_tools_update(Panel):
 
     @classmethod
     def poll(cls, context):
-        return context.scene.shot_type == SHOT_TYPE.LIGHTING
+        return context.scene.shot_type in {
+                SHOT_TYPE.ANIMATION,
+                SHOT_TYPE.LIGHTING,
+                }
 
     def draw(self, context):
         layout = self.layout
 
         col = layout.column()
-        col.operator("shot_tool.update_bone_constraints", icon='CONSTRAINT_BONE')
+        if context.scene.shot_type == SHOT_TYPE.LIGHTING:
+            col.operator("shot_tool.update_bone_constraints_lighting", icon='CONSTRAINT_BONE')
+        else: # SHOT_TYPE.ANIMATION
+            col.operator("shot_tool.update_bone_constraints_animation", icon='CONSTRAINT_BONE')
 
 
 class ST_VIEW3D_PT_tools_misc(Panel):
@@ -120,13 +126,19 @@ class ST_VIEW3D_PT_tools_update_pose(Panel):
 
     @classmethod
     def poll(cls, context):
-        return context.scene.shot_type == SHOT_TYPE.LIGHTING
+        return context.scene.shot_type in {
+                SHOT_TYPE.ANIMATION,
+                SHOT_TYPE.LIGHTING,
+                }
 
     def draw(self, context):
         layout = self.layout
 
         col = layout.column()
-        col.operator("shot_tool.update_pose_bone_constraints", icon='CONSTRAINT_BONE')
+        if context.scene.shot_type == SHOT_TYPE.LIGHTING:
+            col.operator("shot_tool.update_pose_bone_constraints_lighting", icon='CONSTRAINT_BONE')
+        else: # SHOT_TYPE.ANIMATION
+            col.operator("shot_tool.update_pose_bone_constraints_animation", icon='CONSTRAINT_BONE')
 
 
 # ############################################################

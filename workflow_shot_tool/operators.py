@@ -11,6 +11,11 @@ from bpy.types import (
 
 from bpy.props import (
         FloatVectorProperty,
+        StringProperty,
+        )
+
+from bpy_extras.io_utils import (
+        ImportHelper,
         )
 
 from .defines import (
@@ -366,22 +371,9 @@ class ST_SetRenderDefaultsOperator(Operator):
 
 class ST_UpdateBoneConstraintsOperatorCommon(object):
     def _valid(self, context):
-        import os
-
         # check if file was ever saved
         if not context.blend_data.is_saved:
             self.report({'ERROR'}, "Save the file first")
-            return False
-
-        # check if file is lighting
-        if context.scene.shot_type != SHOT_TYPE.LIGHTING:
-            self.report({'ERROR'}, "Current file is not a lighting file")
-            return False
-
-        # check if there is an anim file
-        animfile = get_animation_file(context)
-        if not os.path.isfile(animfile):
-            self.report({'ERROR'}, "There is no anim file ({0})".format(animfile))
             return False
 
         return True
@@ -402,7 +394,7 @@ class ST_UpdateBoneConstraintsOperatorCommon(object):
         armatures = [ob for ob in objects if ob.type == 'ARMATURE']
         armatures_names = {ob.name for ob in armatures}
 
-        anim_file = get_animation_file(context)
+        anim_file = self.get_source_file(context)
         with bpy.data.libraries.load(anim_file, link=True, relative=True) as (data_from, data_to):
             data_to.objects = [ob for ob in data_from.objects if ob in armatures_names]
 
@@ -514,9 +506,58 @@ class ST_UpdateBoneConstraintsOperatorCommon(object):
         return {'FINISHED'}
 
 
-class ST_UpdateBoneConstraintsOperator(ST_UpdateBoneConstraintsOperatorCommon, Operator):
+class ST_UpdateBoneConstraintsLightingOperatorCommon(ST_UpdateBoneConstraintsOperatorCommon):
+    def get_source_file(self, context):
+        return get_animation_file(context)
+
+    def _valid(self, context):
+        import os
+
+        if not super(ST_UpdateBoneConstraintsLightingOperatorCommon, self)._valid:
+            return False
+
+        # check if file is lighting
+        if context.scene.shot_type != SHOT_TYPE.LIGHTING:
+            self.report({'ERROR'}, "Current file is not a lighting file")
+            return False
+
+        # check if there is an anim file
+        animfile = get_animation_file(context)
+        if not os.path.isfile(animfile):
+            self.report({'ERROR'}, "There is no anim file ({0})".format(animfile))
+            return False
+
+        return True
+
+
+class ST_UpdateBoneConstraintsAnimationOperatorCommon(ST_UpdateBoneConstraintsOperatorCommon, ImportHelper):
+    # ImportHelper mixin class uses this
+    filename_ext = ".blend"
+    filter_glob = StringProperty(
+            default="*.blend",
+            options={'HIDDEN'},
+            maxlen=255,  # Max internal buffer length, longer would be clamped.
+            )
+
+    def get_source_file(self, context):
+        # value inherited from ImportHelper
+        return self.filepath
+
+    def _valid(self, context):
+        if not super(ST_UpdateBoneConstraintsAnimationOperatorCommon, self)._valid:
+            return False
+
+        # check if file is animation
+        if context.scene.shot_type != SHOT_TYPE.ANIMATION:
+            self.report({'ERROR'}, "Current file is not an animation file")
+            return False
+
+        return True
+
+
+class ST_UpdateBoneConstraintsLightingOperator(ST_UpdateBoneConstraintsLightingOperatorCommon, Operator):
     """Re-syinc bone constraints from animation file"""
-    bl_idname = "shot_tool.update_bone_constraints"
+    bl_idname = "shot_tool.update_bone_constraints_lighting"
     bl_label = "Update Bone Constraints"
     bl_context = 'objectmode'
 
@@ -533,9 +574,44 @@ class ST_UpdateBoneConstraintsOperator(ST_UpdateBoneConstraintsOperatorCommon, O
         return ob.pose.bones
 
 
-class ST_UpdatePoseBoneConstraintsOperator(ST_UpdateBoneConstraintsOperatorCommon, Operator):
+class ST_UpdateBoneConstraintsAnimationOperator(ST_UpdateBoneConstraintsAnimationOperatorCommon, Operator):
     """Re-syinc bone constraints from animation file"""
-    bl_idname = "shot_tool.update_pose_bone_constraints"
+    bl_idname = "shot_tool.update_bone_constraints_animation"
+    bl_label = "Update Bone Constraints"
+    bl_context = 'objectmode'
+
+    def get_objects(self, context):
+        """
+        Use the selected objects if possible
+        """
+        objects = context.selected_objects
+        if not objects:
+            objects = scene.objects
+        return objects
+
+    def get_pose_bones(self, context, ob):
+        return ob.pose.bones
+
+    def get_animation_file(self, context):
+        return self.get_animation_file(context)
+
+
+class ST_UpdatePoseBoneConstraintsLightingOperator(ST_UpdateBoneConstraintsLightingOperatorCommon, Operator):
+    """Re-syinc bone constraints from animation file"""
+    bl_idname = "shot_tool.update_pose_bone_constraints_lighting"
+    bl_label = "Update Pose Bone Constraints"
+    bl_context = 'posemode'
+
+    def get_objects(self, context):
+        return [context.object]
+
+    def get_pose_bones(self, context, ob):
+        return context.selected_pose_bones
+
+
+class ST_UpdatePoseBoneConstraintsAnimationOperator(ST_UpdateBoneConstraintsAnimationOperatorCommon, Operator):
+    """Re-syinc bone constraints from animation file"""
+    bl_idname = "shot_tool.update_pose_bone_constraints_animation"
     bl_label = "Update Pose Bone Constraints"
     bl_context = 'posemode'
 
@@ -608,8 +684,10 @@ classes = (
         ST_SetHairSystemDefaultsOperator,
         ST_SetRenderDefaultsOperator,
         ST_SetVertexColorOperator,
-        ST_UpdateBoneConstraintsOperator,
-        ST_UpdatePoseBoneConstraintsOperator,
+        ST_UpdateBoneConstraintsLightingOperator,
+        ST_UpdateBoneConstraintsAnimationOperator,
+        ST_UpdatePoseBoneConstraintsLightingOperator,
+        ST_UpdatePoseBoneConstraintsAnimationOperator,
         )
 
 
